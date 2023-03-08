@@ -1,0 +1,4 @@
+--class-path examples
+--class-path lib
+--main Test
+--hl bin/test.hl
