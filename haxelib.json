@@ -1,0 +1,11 @@
+{
+	"name" : "hbitsignals",
+	"url" : "https://github.com/onehundredfeet/hbitsignals",
+	"license" : "MIT",
+	"contributors" : ["onehundredfeet"],
+	"description" : "Simple bit compression and signal quantization for Haxe",
+	"version" : "0.3.0",
+	"releasenote" : "",
+	"classPath": "lib/",
+	"dependencies": {}
+}
