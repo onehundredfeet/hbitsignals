@@ -100,6 +100,9 @@ class BitReader {
 		return v;
 	}
 
+	public function getQuantized(bits:UInt = 32, min:Float = 0, max:Float = 1) {
+		return min + (max - min) * (getInt(bits) / (1 << bits));
+	}
 	public function getString(lengthBits = 16) {
 		var length = getInt(lengthBits);
 		if (length > 0) {

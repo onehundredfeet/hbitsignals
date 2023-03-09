@@ -183,6 +183,20 @@ class BitWriter {
 		_writeHead += 8;
 	}
 
+	public function quantize( v:Float, bits:Int, min:Float, max:Float)  {
+		var range = max - min;
+		var step = range / (1 << bits);
+		var q = Math.floor((v - min) / step);
+		return min + q * step;
+	}
+	
+	public function addQuantized( v:Float, bits:Int, min:Float, max:Float)  {
+		var range = max - min;
+		var step = range / (1 << bits);
+		var q = Math.floor((v - min) / step);
+		addInt(q, bits);
+	}
+
 	public function addString(s:String, lengthBits:Int = 16) {
 		if (s == null) {
 			addInt(0, lengthBits);
