@@ -158,7 +158,7 @@ class BitWriter {
 		}
 	}
 
-	public function addInt64(v:haxe.Int64) {
+	public inline function addInt64(v:haxe.Int64) {
 		flushBits();
 		checkCapacity(8);
 
@@ -169,28 +169,28 @@ class BitWriter {
 		//		_buffer.addInt64(v);
 	}
 
-	public function addSingle(v:Float) {
+	public inline function addSingle(v:Float) {
 		flushBits();
 		checkCapacity(4);
 		_buffer.setF32(_writeHead, v);
 		_writeHead += 4;
 	}
 
-	public function addDouble(v:Float) {
+	public inline function addDouble(v:Float) {
 		flushBits();
 		checkCapacity(8);
 		_buffer.setF64(_writeHead, v);
 		_writeHead += 8;
 	}
 
-	public function quantize( v:Float, bits:Int, min:Float, max:Float)  {
+	public inline function quantize( v:Float, bits:Int, min:Float, max:Float)  {
 		var range = max - min;
 		var step = range / (1 << bits);
 		var q = Math.floor((v - min) / step);
 		return min + q * step;
 	}
-	
-	public function addQuantized( v:Float, bits:Int, min:Float, max:Float)  {
+
+	public inline function addQuantized( v:Float, bits:Int, min:Float, max:Float)  {
 		var range = max - min;
 		var step = range / (1 << bits);
 		var q = Math.floor((v - min) / step);
