@@ -12,7 +12,7 @@ import bitsignals.IntSignal;
 import bitsignals.RemappedSignal;
 
 class TestCase extends utest.Test {
-	var writer = new BitWriter();
+	var writer : BitWriter;
 	var bytes:haxe.io.Bytes;
 	// synchronous setup
 	public function setup() {}
@@ -25,6 +25,8 @@ class TestCase extends utest.Test {
     var _bufferLength : Int;
 
 	function testWriter() {
+        // Test auto expansion, not recommended sizing
+        writer = new BitWriter(16, 16);
         var totalBytes = 0;
         var totalRawBytes = 0;
         var totalSimpleBytes = 0;
@@ -68,6 +70,7 @@ class TestCase extends utest.Test {
         trace('Writer length is ${writer.lengthBytes()} over raw ${totalRawBytes} and simple ${totalSimpleBytes}');
         bytes = writer.getIOBytes();
         _bufferLength = writer.lengthBytes();
+        trace('Backing buffer size ${bytes.length}');
 	}
 
 	function testReader() {

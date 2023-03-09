@@ -2,22 +2,26 @@ package bitsignals;
 
 import haxe.crypto.Base64;
 
+// Auto expends by EXTRA_SIZE
 class BitWriter {
+	static final INITIAL_SIZE = 1024;
+	static final EXTRA_SIZE = 512;
 	var _buffer:haxe.io.Bytes;
 	var _bitHead = 0;
 	var _bitByte = 0;
 	var _writeHead = 0;
 	var _capacity = 0;
 
-	static final INITIAL_SIZE = 1024;
-	static final EXTRA_SIZE = 512;
+	var _expansionSize = EXTRA_SIZE;
 
 
-	public function new(size:Int = 0) {
+	public function new(size:Int = 0, expansionSize:Int = 0) {
 		if (size == 0) {
 			size = INITIAL_SIZE;
 		}
-
+		if (expansionSize > 0) {
+			_expansionSize = expansionSize;
+		}
 		_buffer = haxe.io.Bytes.alloc(INITIAL_SIZE);
 		_capacity = size;
 	}
@@ -73,7 +77,7 @@ class BitWriter {
 
 	function expand(extraCapacity:Int = 0) {
 		if (extraCapacity == 0) {
-			extraCapacity = EXTRA_SIZE;
+			extraCapacity = _expansionSize;
 		}
 		var newCapacity = _capacity + extraCapacity;
 		var newBuffer = haxe.io.Bytes.alloc(newCapacity);
@@ -84,10 +88,8 @@ class BitWriter {
 
 	inline function checkCapacity(size:Int) {
 		if (_writeHead + size > _capacity) {
-			if (size < EXTRA_SIZE)
-				expand(EXTRA_SIZE);
-			else
-				expand(size + EXTRA_SIZE);
+			var count = Std.int(Math.ceil(size / _expansionSize));
+			expand(_expansionSize * count);
 		}
 	}
 
