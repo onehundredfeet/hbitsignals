@@ -1,8 +1,13 @@
 package bitsignals;
 
 class BitReader {
-	public function new(b:haxe.io.Bytes) {
+	public function new(b:haxe.io.Bytes, offset:Int = 0, length:Int = -1) {
 		_buffer = b;
+		if (length == -1)
+			length = b.length - offset;
+		_capacity = length;
+		_readHead = offset;
+		_offset = offset;
 	}
 	public function asHex() {
 		return haxe.crypto.Base64.encode(_buffer);
@@ -11,7 +16,26 @@ class BitReader {
 	var _readHead = 0;
 	var _bitHead = 8;
 	var _bitByte = 0;
+	var _offset = 0;
+	var _capacity = 0;
 
+	public function reset(offset:Int = -1, length:Int = -1) {
+		if (offset == -1)
+			offset = _offset;
+		else 
+			_offset = offset;
+
+		if (length == -1) {
+			length = _buffer.length - offset;
+		}
+		if (length + offset > _buffer.length) {
+			throw "BitReader: reset() length + offset > buffer.length";
+		}
+
+		_capacity = length;
+
+
+	}
 	public inline function discardBits() {
 		_bitHead = 8;
 		_bitByte = 0;
@@ -26,7 +50,7 @@ class BitReader {
 
 	public var bytesRemaining(get, null):Int;
 	function get_bytesRemaining() {
-		return _buffer.length - _readHead;
+		return _capacity - _readHead;
 	}
 
 	function getAvailableBits() {

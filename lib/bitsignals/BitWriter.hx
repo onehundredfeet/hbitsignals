@@ -3,7 +3,7 @@ package bitsignals;
 import haxe.crypto.Base64;
 
 class BitWriter {
-	var _buffer:hl.Bytes;
+	var _buffer:haxe.io.Bytes;
 	var _bitHead = 0;
 	var _bitByte = 0;
 	var _writeHead = 0;
@@ -18,7 +18,7 @@ class BitWriter {
 			size = INITIAL_SIZE;
 		}
 
-		_buffer = new hl.Bytes(INITIAL_SIZE);
+		_buffer = haxe.io.Bytes.alloc(INITIAL_SIZE);
 		_capacity = size;
 	}
 
@@ -46,16 +46,16 @@ class BitWriter {
 	public inline function getIOBytes() {
 		flushBits();
 
-		return _buffer.toBytes(_writeHead);
+		return _buffer;
 	}
 
 	public function asHex() {
 		flushBits();
-		return Base64.encode(_buffer.toBytes(_writeHead));
+		return _buffer.toHex(); //Base64.encode(_buffer.toBytes(_writeHead));
 	}
 
 
-	public function bind(b:hl.Bytes) {
+	public function bind(b:haxe.io.Bytes) {
 		_buffer = b;
 	}
 
@@ -76,7 +76,7 @@ class BitWriter {
 			extraCapacity = EXTRA_SIZE;
 		}
 		var newCapacity = _capacity + extraCapacity;
-		var newBuffer = new hl.Bytes(newCapacity);
+		var newBuffer = haxe.io.Bytes.alloc(newCapacity);
 		newBuffer.blit(0, _buffer, 0, _capacity);
 		_buffer = newBuffer;
 		_capacity = newCapacity;
@@ -96,7 +96,7 @@ class BitWriter {
 			if (_writeHead == _capacity) {
 				expand();
 			}
-			_buffer[_writeHead] = _bitByte;
+			_buffer.set(_writeHead,_bitByte);
 			_bitByte = 0;
 			_bitHead = 0;
 			_writeHead++;
@@ -162,9 +162,9 @@ class BitWriter {
 		flushBits();
 		checkCapacity(8);
 
-		_buffer.setI32(_writeHead, v.low);
+		_buffer.setInt32(_writeHead, v.low);
 		_writeHead += 4;
-		_buffer.setI32(_writeHead, v.high);
+		_buffer.setInt32(_writeHead, v.high);
 		_writeHead += 4;
 		//		_buffer.addInt64(v);
 	}
@@ -172,14 +172,14 @@ class BitWriter {
 	public inline function addSingle(v:Float) {
 		flushBits();
 		checkCapacity(4);
-		_buffer.setF32(_writeHead, v);
+		_buffer.setFloat(_writeHead, v);
 		_writeHead += 4;
 	}
 
 	public inline function addDouble(v:Float) {
 		flushBits();
 		checkCapacity(8);
-		_buffer.setF64(_writeHead, v);
+		_buffer.setDouble(_writeHead, v);
 		_writeHead += 8;
 	}
 
@@ -206,7 +206,7 @@ class BitWriter {
 			addInt(b.length, lengthBits);
 			flushBits();
 			for (i in 0...b.length) {
-				_buffer.setUI8(_writeHead, s.charCodeAt(i));
+				_buffer.set(_writeHead, s.charCodeAt(i));
 				_writeHead++;
 			}
 		}

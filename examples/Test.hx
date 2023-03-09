@@ -22,6 +22,7 @@ class TestCase extends utest.Test {
     final TEST64 = haxe.Int64.make(0x90ABCDEF, 0x12345678);
     var _quant1F : Float;
     var _quant2F : Float;
+    var _bufferLength : Int;
 
 	function testWriter() {
         var totalBytes = 0;
@@ -66,10 +67,11 @@ class TestCase extends utest.Test {
         Assert.equals(writer.lengthBytes(), totalBytes);
         trace('Writer length is ${writer.lengthBytes()} over raw ${totalRawBytes} and simple ${totalSimpleBytes}');
         bytes = writer.getIOBytes();
+        _bufferLength = writer.lengthBytes();
 	}
 
 	function testReader() {
-        var reader = new BitReader(bytes);
+        var reader = new BitReader(bytes, 0, _bufferLength);
         Assert.isTrue(reader.getBool());
         Assert.equals(reader.getInt(1), 0);
         Assert.equals(reader.getInt(2), 1);
@@ -85,7 +87,7 @@ class TestCase extends utest.Test {
         Assert.isTrue(reader.getBool());
         Assert.equals(reader.getInt64(), TEST64);
         Assert.isFalse(reader.getBool());
-        Assert.equals(reader.bytesRemaining, 0);
+        Assert.equals(0, reader.bytesRemaining);
 
 	}
 
