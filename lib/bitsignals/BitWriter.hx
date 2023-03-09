@@ -15,15 +15,19 @@ class BitWriter {
 	var _expansionSize = EXTRA_SIZE;
 
 
-	public function new(size:Int = 0, expansionSize:Int = 0) {
-		if (size == 0) {
-			size = INITIAL_SIZE;
-		}
-		if (expansionSize > 0) {
-			_expansionSize = expansionSize;
-		}
-		_buffer = haxe.io.Bytes.alloc(INITIAL_SIZE);
-		_capacity = size;
+	function new(b:haxe.io.Bytes, offset : Int = 0, capacity = -1, expansionSize:Int = -1) {
+		_buffer = b;
+		_writeHead = offset;
+		_capacity = capacity > 0 ? capacity : b.length;
+		_expansionSize = expansionSize > -1 ? expansionSize : EXTRA_SIZE;
+	}
+
+	public static function makeFromSharedBuffer(b:haxe.io.Bytes, offset : Int = 0, capacity = -1) {
+		return new BitWriter(b, offset, capacity, 0);
+	}
+
+	public static function alloc(capacity : Int, expansionSize : Int = 0) {
+		return new BitWriter(haxe.io.Bytes.alloc(capacity), 0, capacity, expansionSize);
 	}
 
 	public inline function reset() {
@@ -75,10 +79,14 @@ class BitWriter {
 		_bitHead += bits;
 	}
 
-	function expand(extraCapacity:Int = 0) {
-		if (extraCapacity == 0) {
+	function expand(extraCapacity:Int = -1) {
+		if (extraCapacity == -1) {
 			extraCapacity = _expansionSize;
 		}
+		if (extraCapacity == 0) {
+			throw "Cannot expand buffer with 0 expansion capability";
+		}
+
 		var newCapacity = _capacity + extraCapacity;
 		var newBuffer = haxe.io.Bytes.alloc(newCapacity);
 		newBuffer.blit(0, _buffer, 0, _capacity);
