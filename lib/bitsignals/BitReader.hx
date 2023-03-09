@@ -2,45 +2,50 @@ package bitsignals;
 
 class BitReader {
 	public function new(b:haxe.io.Bytes) {
-		_in = b;
+		_buffer = b;
 	}
 	public function asHex() {
-		return haxe.crypto.Base64.encode(_in);
+		return haxe.crypto.Base64.encode(_buffer);
 	}
-	var _in:haxe.io.Bytes;
-	var _inPos = 0;
+	var _buffer:haxe.io.Bytes;
+	var _readHead = 0;
 	var _bitHead = 8;
 	var _bitByte = 0;
 
-	public function discardBits() {
+	public inline function discardBits() {
 		_bitHead = 8;
 		_bitByte = 0;
 	}
 
-	function cacheBits() {
+	inline function cacheBits() {
 		if (_bitHead >= 8) {
 			_bitByte = nextByte();
 			_bitHead = 0;
 		}
 	}
 
+	public var bytesRemaining(get, null):Int;
+	function get_bytesRemaining() {
+		return _buffer.length - _readHead;
+	}
+
 	function getAvailableBits() {
 		return 8 - _bitHead;
 	}
 
-	function clipBits(bits:Int) {
+	inline function clipBits(bits:Int) {
 		return bits > getAvailableBits() ? getAvailableBits() : bits;
 	}
 
-	function advanceBits(bits:Int) {
+	inline function advanceBits(bits:Int) {
 		_bitHead += bits;
 	}
 
-	function getBits(bits:UInt):UInt {
+	inline function getBits(bits:UInt):UInt {
 		return (_bitByte >> _bitHead) & (0xff >> (8 - bits));
 	}
 
-	public function getBool():Bool {
+	public inline function getBool():Bool {
 		cacheBits();
 		var x = getBits(1) > 0;
 		advanceBits(1);
@@ -64,88 +69,47 @@ class BitReader {
 
 		return result;
 	}
+	public inline function getInt32() {
+		return getInt(32);
+	}
 
+	public inline function getInt16() {
+		return getInt(16);
+	}
+	public inline function getInt64() {
+		discardBits();
+		var low = getInt(32);
+		var high = getInt(32);
+		return haxe.Int64.make(high, low);
+	}
 	function nextByte() {
-		return _in.get(_inPos++);
+		return _buffer.get(_readHead++);
 	}
 
 	public function getDouble() {
-		var v = _in.getDouble(_inPos);
-		_inPos += 8;
+		discardBits();
+		var v = _buffer.getDouble(_readHead);
+		_readHead += 8;
 		return v;
 	}
 
 	public function getSingle() {
-		var v = _in.getFloat(_inPos);
-		_inPos += 4;
+		discardBits();
+		var v = _buffer.getFloat(_readHead);
+		_readHead += 4;
 		return v;
 	}
-	/*
 
-		public function getVector<T>(f:Void->T):haxe.ds.Vector<T> {
-			var len = getInt();
-			if (len == 0)
-				return null;
-			len--;
-			var a = new haxe.ds.Vector<T>(len);
-			for (i in 0...len)
-				a[i] = f();
-			return a;
+	public function getString(lengthBits = 16) {
+		var length = getInt(lengthBits);
+		if (length > 0) {
+			discardBits();
+			var str = _buffer.getString(_readHead, length);
+			_readHead += length;
+			return str;
+	
 		}
-
-
-
-		@:extern public function getMap<K, T>(fk:Void->K, ft:Void->T):Map<K, T> {
-			var len = getInt();
-			if (len == 0)
-				return null;
-			var m = new Map<K, T>();
-			while (--len > 0) {
-				var k = fk();
-				var v = ft();
-				m.set(k, v);
-			}
-			return m;
-		}
-
-
-		public function skip(size) {
-			inPos += size;
-		}
-
-		public function getInt32() {
-			var v = input.getInt32(inPos);
-			inPos += 4;
-			return v;
-		}
-
-		public function getInt64() {
-			var v = input.getInt64(inPos);
-			inPos += 8;
-			return v;
-		}
-
-		public function getDouble() {
-			var v = input.getDouble(inPos);
-			inPos += 8;
-			return v;
-		}
-
-		public function getFloat() {
-			var v = input.getFloat(inPos);
-			inPos += 4;
-			return v;
-		}
-
-
-
-		public function addBytes(b:haxe.io.Bytes) {
-			if (b == null)
-				addByte(0);
-			else {
-				addInt(b.length + 1);
-				out.add(b);
-			}
-		}
-	 */
+		return "";
+	}
+	
 }
