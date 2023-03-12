@@ -9,20 +9,20 @@ Very simple bit compression and numberic signal compression library.
 ```haxe
     final INITIAL_SIZE = 1024;
     final EXPANSION_INCREMENT = 512;
+    final QUANT_BITS = 6;
+    final QUANT_MIN = 0.;
+    final QUANT_MAX = 5.;
+    final SINGLE_BIT = 1;
+
     var writer = bitsignals.BitWriter.Alloc(INITIAL_SIZE, EXPANSION_INCREMENT);
 
     writer.addBool( true );
     writer.addInt32( 1 );
-    final SINGLE_BIT = 1;
     writer.addInt(1, SINGLE_BIT);
     writer.addSingle( 3.14 );
     writer.addDouble( 3.14 );
-    final QUANT_BITS = 6;
-    final QUANT_MIN = 0.;
-    final QUANT_MAX = 5.;
     writer.addQuantized( 3.14, QUANT_BITS, QUANT_MIN, QUANT_MAX );
-    // any overhanging bits are turned into a full byte
-    writer.flushBits();
+    writer.flushBits();     // any overhanging bits are turned into a full byte
 
     var hexStr = writer.asHex();
     var buffer = writer.getBytes();// This is the full buffer ATM, use the length bytes for the length
