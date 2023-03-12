@@ -63,8 +63,15 @@ class BitWriter {
 	}
 
 
-	public function bind(b:haxe.io.Bytes) {
+	public function bind(b:haxe.io.Bytes, length : Int = -1) {
 		_buffer = b;
+		if (length > -1) {
+			_capacity = length;
+		} else {
+			_capacity = b.length;
+		}
+		
+		reset();
 	}
 
 	inline function getAvailableBits() {

@@ -33,8 +33,6 @@ class BitReader {
 		}
 
 		_capacity = length;
-
-
 	}
 	public inline function discardBits() {
 		_bitHead = 8;
@@ -123,6 +121,19 @@ class BitReader {
 		_readHead += 4;
 		return v;
 	}
+
+	public function bind(b:haxe.io.Bytes, length : Int = -1) {
+		_buffer = b;
+		if (length > -1) {
+			_capacity = length;
+		} else {
+			_capacity = b.length;
+		}
+		_offset = 0;
+
+		reset();
+	}
+	
 
 	public function getQuantized(bits:UInt = 32, min:Float = 0, max:Float = 1) {
 		return min + (max - min) * (getInt(bits) / (1 << bits));
