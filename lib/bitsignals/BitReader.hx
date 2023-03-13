@@ -19,21 +19,6 @@ class BitReader {
 	var _offset = 0;
 	var _capacity = 0;
 
-	public function reset(offset:Int = -1, length:Int = -1) {
-		if (offset == -1)
-			offset = _offset;
-		else 
-			_offset = offset;
-
-		if (length == -1) {
-			length = _buffer.length - offset;
-		}
-		if (length + offset > _buffer.length) {
-			throw "BitReader: reset() length + offset > buffer.length";
-		}
-
-		_capacity = length;
-	}
 	public inline function discardBits() {
 		_bitHead = 8;
 		_bitByte = 0;
@@ -122,6 +107,11 @@ class BitReader {
 		return v;
 	}
 
+	public inline function rewind() {
+		_readHead = 0;
+		_bitByte = 0;
+		_bitHead = 8;
+	}
 	public function bind(b:haxe.io.Bytes, length : Int = -1) {
 		_buffer = b;
 		if (length > -1) {
@@ -130,8 +120,7 @@ class BitReader {
 			_capacity = b.length;
 		}
 		_offset = 0;
-
-		reset();
+		rewind();
 	}
 	
 

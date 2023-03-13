@@ -4,8 +4,8 @@ import haxe.crypto.Base64;
 
 // Auto expends by EXTRA_SIZE
 class BitWriter {
-	static final INITIAL_SIZE = 1024;
-	static final EXTRA_SIZE = 512;
+	static inline final INITIAL_SIZE = 1024;
+	static inline final EXTRA_SIZE = 512;
 	var _buffer:haxe.io.Bytes;
 	var _bitHead = 0;
 	var _bitByte = 0;
@@ -26,11 +26,11 @@ class BitWriter {
 		return new BitWriter(b, offset, capacity, 0);
 	}
 
-	public static function alloc(capacity : Int, expansionSize : Int = 0) {
+	public static function alloc(capacity : Int = INITIAL_SIZE, expansionSize : Int = 0) {
 		return new BitWriter(haxe.io.Bytes.alloc(capacity), 0, capacity, expansionSize);
 	}
 
-	public inline function reset() {
+	public inline function rewind() {
 		_bitHead = 0;
 		_bitByte = 0;
 		_writeHead = 0;
@@ -48,7 +48,8 @@ class BitWriter {
 	public inline function getBytes() {
 		flushBits();
 
-		return _buffer;
+		var hb : hl.Bytes = _buffer;
+		return hb.toBytes(_writeHead);
 	}
 
 	public inline function getIOBytes() {
@@ -71,7 +72,7 @@ class BitWriter {
 			_capacity = b.length;
 		}
 		
-		reset();
+		rewind();
 	}
 
 	inline function getAvailableBits() {
@@ -103,6 +104,7 @@ class BitWriter {
 
 	inline function checkCapacity(size:Int) {
 		if (_writeHead + size > _capacity) {
+			throw("Not supported");
 			var count = Std.int(Math.ceil(size / _expansionSize));
 			expand(_expansionSize * count);
 		}
